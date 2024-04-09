@@ -13,7 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.JSONObject;
 
-public class ProducerBitcoin {
+public class ProducerHashRate {
 	
 		KafkaProducer<String, String> producer;
 
@@ -42,19 +42,19 @@ public class ProducerBitcoin {
 	            
 	            // Acceder a los valores específicos
 	            String timestamp = jsonObject.getJSONObject("time").getString("updated");
-	            String marketPriceUsd = jsonObject.getJSONObject("bpi").getJSONObject("USD").getString("rate");
+	            Double hashRate = jsonObject.getJSONObject("bpi").getJSONObject("USD").getDouble("rate_float");
 	            
 	            // Aquí podrías actualizar tus datos o hacer lo que necesites con ellos
 	            // Por ahora, solo imprimiremos los valores actualizados
 	            System.out.println("Timestamp: " + timestamp);
-	            System.out.println("Precio de mercado en USD: " + marketPriceUsd);
+	            System.out.println("Tasa de hash: " + hashRate);
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
 		}
 	    
 	    public static void main(String[] args) throws InterruptedException {
-	        ProducerBitcoin dataProducer = new ProducerBitcoin();
+	        ProducerHashRate dataProducer = new ProducerHashRate();
 	        
 	        // Check arguments length value
 			if (args.length == 0) {
