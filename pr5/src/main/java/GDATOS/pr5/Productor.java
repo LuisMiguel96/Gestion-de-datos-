@@ -1,7 +1,11 @@
 package GDATOS.pr5;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.RegularTimePeriod;
+import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.TimeSeriesDataItem;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
@@ -14,19 +18,24 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import org.json.JSONObject;
 
-public class ProducerHashRate {
+public class Productor {
 	
 		KafkaProducer<String, String> producer;
-		public static TimeSeries hash = new TimeSeries("Hash rate");
+		public static  TimeSeries hash = new TimeSeries("Hash rate");
 		public static TimeSeries time = new TimeSeries("Time");
+		public static TimeSeries bitcoin = new TimeSeries("Bitcoin");
 		static TimeSeriesCollection dataset = new TimeSeriesCollection();
 
 		private static void fetchDataAndUpdate() {
 	        try {
 	            // URL de la API de Blockchain.info
-	            String urlString = "https://api.coindesk.com/v1/bpi/currentprice.json";
+	            String urlString = "https://api.blockchain.info/stats";
 	            URL url = new URL(urlString);
 	            
 	            // Realizar la conexión HTTP
@@ -47,21 +56,31 @@ public class ProducerHashRate {
 	            JSONObject jsonObject = new JSONObject(response.toString());
 	            
 	            // Acceder a los valores específicos
-	            String timestamp = jsonObject.getJSONObject("time").getString("updated");
-	            Double hashRate = jsonObject.getJSONObject("bpi").getJSONObject("USD").getDouble("rate_float");
+	            long timestamp = jsonObject.getLong("timestamp");
+	            double hashRate = jsonObject.getDouble("hash_rate");
+	            double marketPriceUsd = jsonObject.getDouble("market_price_us");
+
+	            Date date = new Date(timestamp);
+	            Second second = new Second(date);
+	            	
+		        hash.add(second, hashRate);
+		        bitcoin.add(second,marketPriceUsd);
+	            
 	            dataset.addSeries(hash);
-	            dataset.addSeries(time);
+	            dataset.addSeries(bitcoin);
+	            
 	            // Aquí podrías actualizar tus datos o hacer lo que necesites con ellos
 	            // Por ahora, solo imprimiremos los valores actualizados
 	            System.out.println("Timestamp: " + timestamp);
 	            System.out.println("Tasa de hash: " + hashRate);
+	            System.out.println("Bitcoin: " + marketPriceUsd);
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
 		}
 	    
 	    public static void main(String[] args) throws InterruptedException {
-	        ProducerHashRate dataProducer = new ProducerHashRate();
+	        Productor dataProducer = new Productor();
 	        
 	        // Check arguments length value
 			if (args.length == 0) {

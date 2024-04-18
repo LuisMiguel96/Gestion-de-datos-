@@ -2,6 +2,7 @@ package GDATOS.pr5;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.jfree.data.time.TimeSeries;
 
 import java.util.Properties;
 import java.util.Random;
@@ -16,7 +17,7 @@ import org.json.JSONObject;
 public class ProducerBitcoin {
 	
 		KafkaProducer<String, String> producer;
-
+	
 		private static void fetchDataAndUpdate() {
 	        try {
 	            // URL de la API de Blockchain.info
@@ -43,7 +44,6 @@ public class ProducerBitcoin {
 	            // Acceder a los valores específicos
 	            String timestamp = jsonObject.getJSONObject("time").getString("updated");
 	            String marketPriceUsd = jsonObject.getJSONObject("bpi").getJSONObject("USD").getString("rate");
-	            
 	            // Aquí podrías actualizar tus datos o hacer lo que necesites con ellos
 	            // Por ahora, solo imprimiremos los valores actualizados
 	            System.out.println("Timestamp: " + timestamp);
@@ -83,10 +83,6 @@ public class ProducerBitcoin {
 
 			Producer<String, String> producer = new KafkaProducer<String, String>(props);
 
-			for (int i = 0; i < 20; i++) {
-				producer.send(new ProducerRecord<String, String>(topicName, Integer.toString(i), Integer.toString(i)));
-				System.out.println("Message sent successfully");
-			}
 			while (true) {
 	            fetchDataAndUpdate();
 	            try {
